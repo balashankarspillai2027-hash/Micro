@@ -198,20 +198,24 @@ public class AddEditAppointmentActivity extends AppCompatActivity {
 
         // Match service spinner
         String service = editingAppointment.getServiceName();
-        ArrayAdapter adapter = (ArrayAdapter) spinnerService.getAdapter();
-        for (int i = 0; i < adapter.getCount(); i++) {
-            if (adapter.getItem(i).toString().toLowerCase().contains(service.toLowerCase())) {
-                spinnerService.setSelection(i);
-                break;
+        if (service != null) {
+            ArrayAdapter<?> adapter = (ArrayAdapter<?>) spinnerService.getAdapter();
+            for (int i = 0; i < adapter.getCount(); i++) {
+                Object item = adapter.getItem(i);
+                if (item != null && item.toString().toLowerCase().contains(service.toLowerCase())) {
+                    spinnerService.setSelection(i);
+                    break;
+                }
             }
         }
 
         // Match stylist spinner
         String stylist = editingAppointment.getStylistName();
         if (stylist != null) {
-            ArrayAdapter stylistAdp = (ArrayAdapter) spinnerStylist.getAdapter();
+            ArrayAdapter<?> stylistAdp = (ArrayAdapter<?>) spinnerStylist.getAdapter();
             for (int i = 0; i < stylistAdp.getCount(); i++) {
-                if (stylistAdp.getItem(i).toString().equalsIgnoreCase(stylist)) {
+                Object item = stylistAdp.getItem(i);
+                if (item != null && item.toString().equalsIgnoreCase(stylist)) {
                     spinnerStylist.setSelection(i);
                     break;
                 }
@@ -221,9 +225,10 @@ public class AddEditAppointmentActivity extends AppCompatActivity {
         // Match status spinner
         String status = editingAppointment.getStatus();
         if (status != null) {
-            ArrayAdapter statusAdp = (ArrayAdapter) spinnerStatus.getAdapter();
+            ArrayAdapter<?> statusAdp = (ArrayAdapter<?>) spinnerStatus.getAdapter();
             for (int i = 0; i < statusAdp.getCount(); i++) {
-                if (statusAdp.getItem(i).toString().equalsIgnoreCase(status)) {
+                Object item = statusAdp.getItem(i);
+                if (item != null && item.toString().equalsIgnoreCase(status)) {
                     spinnerStatus.setSelection(i);
                     break;
                 }
