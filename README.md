@@ -22,7 +22,12 @@ An offline, SQLite-powered Android application built in **Java** to book, schedu
    - **Completed Bookings Counter**
 
 2. **📅 Comprehensive Booking Form (`AddEditAppointmentActivity`):**
-   - Customer Name & Phone Number input validation.
+   - **Strict Input Validations**:
+     - **Customer Name**: Enforces alphabetical characters, periods, apostrophes, and 2–50 character length.
+     - **Phone Number**: Strips formatting symbols and enforces valid 10–13 digit mobile numbers.
+     - **Price**: Requires non-empty, non-negative numbers up to ₹1,00,000.
+     - **Time & Date Guardrails**: Disallows selecting past hours on today's date.
+     - **Stylist Conflict Detection**: Warns if a stylist already has an active appointment in that time slot.
    - Pre-configured salon services menu with automated price calculation:
      - Haircut & Styling (₹250)
      - Beard Trim & Shave (₹150)
