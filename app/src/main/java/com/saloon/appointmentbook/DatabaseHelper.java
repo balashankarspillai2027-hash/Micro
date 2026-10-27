@@ -94,6 +94,31 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 new String[]{String.valueOf(id)});
     }
 
+    public boolean isStylistOccupied(String stylistName, String date, String time, int excludeId) {
+        if (stylistName == null || stylistName.trim().isEmpty() || stylistName.equalsIgnoreCase("Any Available Stylist")) {
+            return false;
+        }
+        SQLiteDatabase db = this.getReadableDatabase();
+        String sql = "SELECT COUNT(*) FROM " + TABLE_NAME + " WHERE "
+                + COLUMN_STYLIST + " = ? AND "
+                + COLUMN_DATE + " = ? AND "
+                + COLUMN_TIME + " = ? AND "
+                + COLUMN_STATUS + " != 'Cancelled' AND "
+                + COLUMN_ID + " != ?";
+        Cursor cursor = db.rawQuery(sql, new String[]{stylistName.trim(), date.trim(), time.trim(), String.valueOf(excludeId)});
+        int count = 0;
+        if (cursor != null) {
+            try {
+                if (cursor.moveToFirst()) {
+                    count = cursor.getInt(0);
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+        return count > 0;
+    }
+
     public int deleteAppointment(int id) {
         SQLiteDatabase db = this.getWritableDatabase();
         return db.delete(TABLE_NAME, COLUMN_ID + " = ?",
@@ -195,6 +220,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
         }
         return count;
+    }
+
+    public double getTodayRevenue(String todayDate) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT SUM(" + COLUMN_PRICE + ") FROM " + TABLE_NAME
+                + " WHERE " + COLUMN_DATE + " = ? AND " + COLUMN_STATUS + " = 'Completed'", new String[]{todayDate});
+        double revenue = 0.0;
+        if (cursor != null) {
+            try {
+                if (cursor.moveToFirst()) {
+                    revenue = cursor.getDouble(0);
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+        return revenue;
     }
 
     public void seedInitialDataIfEmpty(String todayDate) {

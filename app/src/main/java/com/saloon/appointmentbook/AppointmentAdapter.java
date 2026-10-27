@@ -87,8 +87,12 @@ public class AppointmentAdapter extends RecyclerView.Adapter<AppointmentAdapter.
         holder.btnCallCustomer.setOnClickListener(v -> {
             String phone = appointment.getCustomerPhone();
             if (phone != null && !phone.trim().isEmpty()) {
-                Intent dialIntent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phone.trim()));
-                context.startActivity(dialIntent);
+                try {
+                    Intent dialIntent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phone.trim()));
+                    context.startActivity(dialIntent);
+                } catch (Exception e) {
+                    Toast.makeText(context, "No dialer app available on this device", Toast.LENGTH_SHORT).show();
+                }
             } else {
                 Toast.makeText(context, "No phone number available", Toast.LENGTH_SHORT).show();
             }

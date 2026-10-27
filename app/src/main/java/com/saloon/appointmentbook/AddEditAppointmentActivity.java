@@ -152,10 +152,11 @@ public class AddEditAppointmentActivity extends AppCompatActivity {
 
             DatePickerDialog datePickerDialog = new DatePickerDialog(this,
                     (view, selectedYear, selectedMonth, selectedDay) -> {
-                        Calendar chosenCal = Calendar.getInstance();
-                        chosenCal.set(selectedYear, selectedMonth, selectedDay);
+                        calendar.set(Calendar.YEAR, selectedYear);
+                        calendar.set(Calendar.MONTH, selectedMonth);
+                        calendar.set(Calendar.DAY_OF_MONTH, selectedDay);
                         SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
-                        selectedDate = sdf.format(chosenCal.getTime());
+                        selectedDate = sdf.format(calendar.getTime());
                         tvSelectedDate.setText(selectedDate);
                     }, year, month, day);
 
@@ -170,11 +171,11 @@ public class AddEditAppointmentActivity extends AppCompatActivity {
 
             TimePickerDialog timePickerDialog = new TimePickerDialog(this,
                     (view, hourOfDay, minuteOfHour) -> {
-                        Calendar chosenTime = Calendar.getInstance();
-                        chosenTime.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                        chosenTime.set(Calendar.MINUTE, minuteOfHour);
+                        calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                        calendar.set(Calendar.MINUTE, minuteOfHour);
+                        calendar.set(Calendar.SECOND, 0);
                         SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a", Locale.getDefault());
-                        selectedTime = sdf.format(chosenTime.getTime());
+                        selectedTime = sdf.format(calendar.getTime());
                         tvSelectedTime.setText(selectedTime);
                     }, hour, minute, false);
             timePickerDialog.show();
@@ -242,28 +243,57 @@ public class AddEditAppointmentActivity extends AppCompatActivity {
         String priceStr = etServicePrice.getText() != null ? etServicePrice.getText().toString().trim() : "";
         String notes = etNotes.getText() != null ? etNotes.getText().toString().trim() : "";
 
+        // 1. Customer Name Validation (letters, dots, spaces, min 2 chars)
         if (name.isEmpty()) {
             etCustomerName.setError("Customer name is required");
             etCustomerName.requestFocus();
             return;
         }
+        if (name.length() < 2 || !name.matches("^[a-zA-Z\\s.']{2,50}$")) {
+            etCustomerName.setError("Enter a valid name (2-50 characters, letters only)");
+            etCustomerName.requestFocus();
+            return;
+        }
 
+        // 2. Customer Phone Validation (10 to 13 digits)
         if (phone.isEmpty()) {
             etCustomerPhone.setError("Phone number is required");
             etCustomerPhone.requestFocus();
             return;
         }
-
-        double price = 0.0;
-        if (!priceStr.isEmpty()) {
-            try {
-                price = Double.parseDouble(priceStr);
-            } catch (NumberFormatException e) {
-                etServicePrice.setError("Invalid price");
-                return;
-            }
+        String cleanPhone = phone.replaceAll("[\\s\\-\\(\\)]", "");
+        if (!cleanPhone.matches("^(\\+?[0-9]{10,13})$")) {
+            etCustomerPhone.setError("Enter a valid 10-digit mobile number");
+            etCustomerPhone.requestFocus();
+            return;
         }
 
+        // 3. Price Validation (non-empty, non-negative, numeric)
+        if (priceStr.isEmpty()) {
+            etServicePrice.setError("Price is required");
+            etServicePrice.requestFocus();
+            return;
+        }
+        double price;
+        try {
+            price = Double.parseDouble(priceStr);
+            if (price < 0) {
+                etServicePrice.setError("Price cannot be negative");
+                etServicePrice.requestFocus();
+                return;
+            }
+            if (price > 100000) {
+                etServicePrice.setError("Price cannot exceed ₹1,00,000");
+                etServicePrice.requestFocus();
+                return;
+            }
+        } catch (NumberFormatException e) {
+            etServicePrice.setError("Enter a valid numerical price");
+            etServicePrice.requestFocus();
+            return;
+        }
+
+        // 4. Date and Time Selection Validation
         if (selectedDate.isEmpty() || selectedDate.equalsIgnoreCase("Select Date")) {
             Toast.makeText(this, "Please select an appointment date", Toast.LENGTH_SHORT).show();
             return;
@@ -274,12 +304,34 @@ public class AddEditAppointmentActivity extends AppCompatActivity {
             return;
         }
 
-        String rawService = spinnerService.getSelectedItem().toString();
-        // Extract clean service name without price tag if needed
-        String serviceName = rawService.contains(" (") ? rawService.substring(0, rawService.indexOf(" (")) : rawService;
-        String stylistName = spinnerStylist.getSelectedItem().toString();
-        String status = spinnerStatus.getSelectedItem().toString();
+        // 5. Past Date & Time Guardrail
+        if (!isEditMode && calendar.getTimeInMillis() < (System.currentTimeMillis() - 5 * 60 * 1000)) {
+            Toast.makeText(this, "Selected time is in the past. Please choose an upcoming slot.", Toast.LENGTH_LONG).show();
+            return;
+        }
 
+        String rawService = spinnerService.getSelectedItem() != null ? spinnerService.getSelectedItem().toString() : "Haircut & Styling";
+        String serviceName = rawService.contains(" (") ? rawService.substring(0, rawService.indexOf(" (")) : rawService;
+        String stylistName = spinnerStylist.getSelectedItem() != null ? spinnerStylist.getSelectedItem().toString() : "Any Available Stylist";
+        String status = spinnerStatus.getSelectedItem() != null ? spinnerStatus.getSelectedItem().toString() : "Booked";
+
+        // 6. Stylist Double-Booking Conflict Check
+        int excludeId = (isEditMode && editingAppointment != null) ? editingAppointment.getId() : -1;
+        if (dbHelper.isStylistOccupied(stylistName, selectedDate, selectedTime, excludeId)) {
+            new androidx.appcompat.app.AlertDialog.Builder(this)
+                    .setTitle("⚠️ Stylist Conflict")
+                    .setMessage(stylistName + " already has a booking at " + selectedTime + " on " + selectedDate + ".\n\nDo you want to proceed anyway, or change the slot/stylist?")
+                    .setPositiveButton("Proceed Anyway", (dialog, which) -> executeSave(name, cleanPhone, serviceName, price, stylistName, status, notes))
+                    .setNegativeButton("Change Slot", null)
+                    .show();
+            return;
+        }
+
+        executeSave(name, cleanPhone, serviceName, price, stylistName, status, notes);
+    }
+
+    private void executeSave(String name, String phone, String serviceName, double price,
+                            String stylistName, String status, String notes) {
         if (isEditMode && editingAppointment != null) {
             editingAppointment.setCustomerName(name);
             editingAppointment.setCustomerPhone(phone);
