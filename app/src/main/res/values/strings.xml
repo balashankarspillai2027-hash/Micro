@@ -1,0 +1,54 @@
+<resources>
+    <string name="app_name">Saloon Appointment Book</string>
+    <string name="tagline">Book &amp; Manage Salon Appointments</string>
+    <string name="total_appointments">Total Bookings</string>
+    <string name="today_appointments">Today</string>
+    <string name="completed_appointments">Completed</string>
+    <string name="search_hint">Search customer, service, phone&#8230;</string>
+    <string name="filter_all">All</string>
+    <string name="filter_booked">Booked</string>
+    <string name="filter_completed">Completed</string>
+    <string name="filter_cancelled">Cancelled</string>
+    <string name="btn_new_booking">New Appointment</string>
+    <string name="no_appointments">No Appointments Found</string>
+    <string name="no_appointments_sub">Tap the + button below to create a new customer booking</string>
+    
+    <string name="add_appointment">Book Appointment</string>
+    <string name="edit_appointment">Edit Appointment</string>
+    <string name="customer_name">Customer Name</string>
+    <string name="customer_phone">Phone Number</string>
+    <string name="select_service">Select Service</string>
+    <string name="service_price">Price (₹)</string>
+    <string name="select_stylist">Select Stylist / Barber</string>
+    <string name="appointment_date">Date</string>
+    <string name="appointment_time">Time</string>
+    <string name="appointment_status">Status</string>
+    <string name="notes_hint">Special requests or notes (optional)</string>
+    <string name="btn_save">Save Appointment</string>
+    <string name="btn_cancel">Cancel</string>
+
+    <string-array name="services_array">
+        <item>Haircut &amp; Styling (₹250)</item>
+        <item>Beard Trim &amp; Shave (₹150)</item>
+        <item>Hair Color &amp; Highlights (₹700)</item>
+        <item>Facial &amp; Skin Glow (₹800)</item>
+        <item>Head Massage &amp; Oil Therapy (₹300)</item>
+        <item>Hair Spa &amp; Keratin Treatment (₹1200)</item>
+        <item>Royal Grooming Package (₹1500)</item>
+        <item>Custom Service</item>
+    </string-array>
+
+    <string-array name="stylists_array">
+        <item>Any Available Stylist</item>
+        <item>Rahul (Master Barber)</item>
+        <item>Priya (Hair &amp; Color Specialist)</item>
+        <item>Vikram (Senior Stylist)</item>
+        <item>Aman (Grooming Expert)</item>
+    </string-array>
+
+    <string-array name="status_array">
+        <item>Booked</item>
+        <item>Completed</item>
+        <item>Cancelled</item>
+    </string-array>
+</resources>
