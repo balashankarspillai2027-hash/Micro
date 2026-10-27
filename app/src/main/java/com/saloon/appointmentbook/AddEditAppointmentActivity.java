@@ -59,7 +59,11 @@ public class AddEditAppointmentActivity extends AppCompatActivity {
         }
 
         if (!isEditMode) {
-            // Default date to today & time to upcoming hour
+            // Default to the next upcoming hour slot (e.g. if 2:15 PM, defaults to 3:00 PM)
+            calendar.add(Calendar.HOUR_OF_DAY, 1);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
             selectedDate = dateFormat.format(calendar.getTime());
             tvSelectedDate.setText(selectedDate);
